@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PlanCut - Gerenciamento e Controle de Agenda</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles/style.css">
+</head>
+<body>
+
+  <!-- NAVEGAÇÃO LATERAL (SIDEBAR) -->
+  <aside>
+    <div>
+      <div class="brand">
+        ✂ PlanCut
+      </div>
+      <ul class="nav-menu">
+        <li class="nav-item active"><a href="#" data-page="dashboard">Dashboard</a></li>
+        <li class="nav-item"><a href="#" data-page="financeiro">Financeiro</a></li>
+        <li class="nav-item"><a href="#" data-page="clientes">Clientes</a></li>
+        <li class="nav-item"><a href="#" data-page="historico">Histórico</a></li>
+      </ul>
+    </div>
+    <button class="btn-logout" id="btnLogout">LOGOUT</button>
+  </aside>
+
+  <!-- ÁREA PRINCIPAL DO SISTEMA -->
+  <main>
+    <header>
+      <h1 id="pageTitle">Dashboard · Agenda</h1>
+      <button type="button" class="user-profile" id="btnAbrirConfiguracoes" title="Configurações">
+        <span id="userDisplayName">Barbearia Silva</span>
+        <div class="avatar" id="userAvatar">BS</div>
+      </button>
+    </header>
+
+    <!-- PÁGINA: DASHBOARD -->
+    <div class="content-container" id="page-dashboard">
+
+      <!-- PAINEL CENTRAL: CALENDÁRIO -->
+      <section class="card">
+        <div class="card-title">
+          <span>Calendário</span>
+          <button class="btn-action" id="btnNovoHorario">+ Novo horário</button>
+        </div>
+
+        <div class="calendar-nav">
+          <button class="btn-nav" id="btnPrevMonth" aria-label="Mês anterior">‹</button>
+          <span class="calendar-month-label" id="calendarMonthLabel">—</span>
+          <button class="btn-nav" id="btnNextMonth" aria-label="Próximo mês">›</button>
+        </div>
+
+        <div class="calendar-grid" id="calendarGrid">
+          <div class="calendar-day-head">Dom</div>
+          <div class="calendar-day-head">Seg</div>
+          <div class="calendar-day-head">Ter</div>
+          <div class="calendar-day-head">Qua</div>
+          <div class="calendar-day-head">Qui</div>
+          <div class="calendar-day-head">Sex</div>
+          <div class="calendar-day-head">Sáb</div>
+
+          <!-- Dias do mês injetados via JS -->
+        </div>
+      </section>
+
+      <!-- PAINEL LATERAL: CATEGORIAS E STATUS -->
+      <div class="side-panel">
+
+        <section class="card">
+          <div class="card-title">
+            <span>Categorias de serviço</span>
+          </div>
+          <ul class="category-list" id="categoryList">
+            <!-- Categorias injetadas via JS -->
+          </ul>
+          <button class="btn-action" style="width: 100%; margin-top: 12px;" id="btnNovaCategoria">+ Nova categoria</button>
+        </section>
+
+        <section class="card">
+          <div class="card-title">
+            <span>Legenda de status</span>
+          </div>
+          <ul class="status-list">
+            <li><span class="status-pill status-finalizado">Finalizado</span></li>
+            <li><span class="status-pill status-pendente">Pendente</span></li>
+            <li><span class="status-pill status-falta">Falta</span></li>
+          </ul>
+        </section>
+
+      </div>
+
+    </div>
+
+    <!-- PÁGINA: FINANCEIRO -->
+    <div class="content-container single-col" id="page-financeiro" style="display:none;">
+
+      <!-- RESUMO DO MÊS + SALDO POR PERÍODO (bloco de destaque, hierarquia principal) -->
+      <section class="card finance-hero">
+        <div class="card-title">
+          <span id="resumoMesTitulo">Resumo do mês</span>
+        </div>
+        <div class="finance-stats finance-summary">
+          <div class="finance-stat finance-summary-receita">
+            <span class="finance-label">Receita (atendimentos finalizados)</span>
+            <strong id="resumoReceita">R$ 0,00</strong>
+          </div>
+          <div class="finance-stat finance-summary-despesas">
+            <span class="finance-label">Despesas do mês</span>
+            <strong id="resumoDespesas">R$ 0,00</strong>
+          </div>
+          <div class="finance-stat finance-summary-produtos">
+            <span class="finance-label">Produtos adquiridos</span>
+            <strong id="resumoProdutos">R$ 0,00</strong>
+          </div>
+          <div class="finance-stat finance-summary-saldo">
+            <span class="finance-label">Saldo do mês</span>
+            <strong id="resumoSaldo">R$ 0,00</strong>
+          </div>
+        </div>
+        <p class="finance-hint">Saldo do mês = Receita − Despesas − Produtos adquiridos.</p>
+
+        <div class="finance-period-row">
+          <div class="finance-period-item">
+            <span class="finance-period-label">Hoje</span>
+            <strong id="saldoDia">R$ 0,00</strong>
+          </div>
+          <div class="finance-period-item">
+            <span class="finance-period-label">Semana</span>
+            <strong id="saldoSemana">R$ 0,00</strong>
+          </div>
+          <div class="finance-period-item">
+            <span class="finance-period-label">Mês</span>
+            <strong id="saldoMes">R$ 0,00</strong>
+          </div>
+          <div class="finance-period-item">
+            <span class="finance-period-label">Ano</span>
+            <strong id="saldoAno">R$ 0,00</strong>
+          </div>
+        </div>
+        <p class="finance-hint">Saldo por período calculado a partir dos horários com status <strong>Finalizado</strong>.</p>
+      </section>
+
+      <!-- LANÇAMENTOS: GASTOS E PRODUTOS EM ABAS (evita a bagunça de dois formulários lado a lado) -->
+      <section class="card">
+        <div class="card-title">
+          <span>Lançamentos</span>
+        </div>
+
+        <div class="finance-tabs" role="tablist">
+          <button type="button" class="finance-tab active" id="tabBtnGastos" data-target="tabPanelGastos">💸 Gastos do mês</button>
+          <button type="button" class="finance-tab" id="tabBtnProdutos" data-target="tabPanelProdutos">🛍 Produtos adquiridos</button>
+        </div>
+
+        <div class="finance-tab-panel" id="tabPanelGastos">
+          <div class="finance-list-header">
+            <span class="finance-list-total">Total lançado: <strong id="expenseTotal">R$ 0,00</strong></span>
+            <button type="button" class="btn-toggle-form" id="btnToggleFormGasto">+ Adicionar gasto</button>
+          </div>
+          <form id="formGasto" class="stacked-form finance-inline-form" hidden>
+            <div class="form-group">
+              <label for="gastoDescricao">Descrição</label>
+              <input type="text" id="gastoDescricao" placeholder="Ex: Aluguel, energia..." required>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="gastoValor">Valor (R$)</label>
+                <input type="number" id="gastoValor" step="0.01" min="0" placeholder="0,00" required>
+              </div>
+              <div class="form-group">
+                <label for="gastoData">Data</label>
+                <input type="date" id="gastoData" required>
+              </div>
+            </div>
+            <button type="submit" class="btn-action full-width">Salvar gasto</button>
+          </form>
+          <ul class="category-list finance-entry-list" id="expenseList"></ul>
+          <p class="empty-state" id="expenseEmpty">Nenhum gasto cadastrado ainda.</p>
+        </div>
+
+        <div class="finance-tab-panel" id="tabPanelProdutos" hidden>
+          <div class="finance-list-header">
+            <span class="finance-list-total">Total lançado: <strong id="productTotal">R$ 0,00</strong></span>
+            <button type="button" class="btn-toggle-form" id="btnToggleFormProduto">+ Adicionar produto</button>
+          </div>
+          <form id="formProduto" class="stacked-form finance-inline-form" hidden>
+            <div class="form-group">
+              <label for="produtoNome">Produto</label>
+              <input type="text" id="produtoNome" placeholder="Ex: Pomada, shampoo..." required>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="produtoQuantidade">Quantidade</label>
+                <input type="number" id="produtoQuantidade" min="1" step="1" value="1" required>
+              </div>
+              <div class="form-group">
+                <label for="produtoValor">Valor total (R$)</label>
+                <input type="number" id="produtoValor" step="0.01" min="0" placeholder="0,00" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="produtoData">Data</label>
+              <input type="date" id="produtoData" required>
+            </div>
+            <button type="submit" class="btn-action full-width">Salvar produto</button>
+          </form>
+          <ul class="category-list finance-entry-list" id="productList"></ul>
+          <p class="empty-state" id="productEmpty">Nenhum produto cadastrado ainda.</p>
+        </div>
+      </section>
+
+      <!-- ATIVIDADE DE ATENDIMENTOS EM ABAS -->
+      <section class="card">
+        <div class="card-title">
+          <span>Atividade de atendimentos</span>
+        </div>
+
+        <div class="finance-tabs" role="tablist">
+          <button type="button" class="finance-tab active" id="tabBtnHoje" data-target="tabPanelHoje">Hoje</button>
+          <button type="button" class="finance-tab" id="tabBtnFinalizados" data-target="tabPanelFinalizados">Últimos finalizados</button>
+        </div>
+
+        <div class="finance-tab-panel" id="tabPanelHoje">
+          <ul class="category-list" id="financeTodayList"></ul>
+          <p class="empty-state" id="financeTodayEmpty">Nenhum agendamento para hoje.</p>
+        </div>
+
+        <div class="finance-tab-panel" id="tabPanelFinalizados" hidden>
+          <ul class="category-list" id="financeList"></ul>
+          <p class="empty-state" id="financeEmpty">Nenhum atendimento finalizado ainda.</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- PÁGINA: CLIENTES -->
+    <div class="content-container single-col" id="page-clientes" style="display:none;">
+      <section class="card">
+        <div class="card-title">
+          <span>Clientes cadastrados</span>
+        </div>
+        <form id="formCliente" class="inline-form">
+          <input type="text" id="clienteNome" placeholder="Nome do cliente" required>
+          <input type="tel" id="clienteTelefone" placeholder="Telefone" required>
+          <button type="submit" class="btn-action">+ Adicionar</button>
+        </form>
+        <ul class="category-list" id="clientList"></ul>
+        <p class="empty-state" id="clientEmpty">Nenhum cliente cadastrado ainda.</p>
+      </section>
+    </div>
+
+    <!-- MODAL: EDITAR CLIENTE -->
+    <div class="modal-overlay" id="clientEditModal">
+      <div class="modal-card">
+        <h3>Editar cliente</h3>
+        <form id="formEditCliente">
+          <div class="form-group">
+            <label for="editClienteNome">Nome do cliente</label>
+            <input type="text" id="editClienteNome" placeholder="Nome do cliente" required>
+          </div>
+          <div class="form-group">
+            <label for="editClienteTelefone">Telefone</label>
+            <input type="tel" id="editClienteTelefone" placeholder="Telefone" required>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-cancel" id="btnCancelEditCliente">Cancelar</button>
+            <button type="submit" class="btn-action">Salvar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL: CONFIRMAR EXCLUSÃO DE CLIENTE -->
+    <div class="modal-overlay" id="clientDeleteModal">
+      <div class="modal-card">
+        <h3>Excluir cliente</h3>
+        <p>Deseja realmente excluir o cliente <strong id="clientDeleteNome">[NOME]</strong>?</p>
+        <div class="modal-actions">
+          <button class="btn-cancel" id="btnCancelClientDelete">Cancelar</button>
+          <button class="btn-action btn-danger" id="btnConfirmClientDelete">Excluir</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PÁGINA: HISTÓRICO -->
+    <div class="content-container single-col" id="page-historico" style="display:none;">
+      <section class="card">
+        <div class="card-title">
+          <span>Histórico de atendimentos</span>
+        </div>
+        <ul class="category-list" id="historicoList"></ul>
+        <p class="empty-state" id="historicoEmpty">Nenhum atendimento finalizado ou com falta ainda.</p>
+      </section>
+    </div>
+
+  </main>
+
+  <!-- MODAL DE EXCLUSÃO DE CATEGORIA -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal-card">
+      <h3>Excluir categoria</h3>
+      <p>Deseja realmente excluir a categoria <strong id="categoriaNome">[NOME]</strong> permanentemente?</p>
+      <input type="text" id="confirmInput" placeholder="Digite o nome para confirmar">
+      <div class="modal-actions">
+        <button class="btn-cancel" id="btnCancelModal">Cancelar</button>
+        <button class="btn-action btn-danger" id="btnConfirmDelete">Excluir</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NOVA / EDITAR CATEGORIA -->
+  <div class="modal-overlay" id="categoryModal">
+    <div class="modal-card">
+      <h3 id="categoryModalTitle">Nova categoria</h3>
+      <form id="formCategoria">
+        <div class="form-group">
+          <label for="catNome">Nome do serviço</label>
+          <input type="text" id="catNome" placeholder="Ex: Sobrancelha" required>
+        </div>
+        <div class="form-group">
+          <label for="catPreco">Preço (R$)</label>
+          <input type="number" id="catPreco" min="0" step="0.01" placeholder="Ex: 20.00" required>
+        </div>
+        <div class="form-group">
+          <label for="catIcone">Ícone (emoji)</label>
+          <input type="text" id="catIcone" placeholder="Ex: ✂ ou 🪒" maxlength="4">
+        </div>
+        <div class="form-group">
+          <label for="catIconeArquivo">Ou envie uma imagem (PNG, JPG...)</label>
+          <input type="file" id="catIconeArquivo" accept="image/*">
+          <div class="icon-preview-row" id="catIconePreviewRow" style="display:none;">
+            <img id="catIconePreview" alt="Prévia do ícone">
+            <button type="button" class="btn-inline-remove" id="btnRemoverIconeArquivo" title="Remover imagem">✕</button>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-action btn-danger" id="btnExcluirCategoria" style="display:none; margin-right:auto;">Excluir</button>
+          <button type="button" class="btn-cancel" id="btnCancelCategoria">Cancelar</button>
+          <button type="submit" class="btn-action">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: LISTA DE HORÁRIOS DO DIA -->
+  <div class="modal-overlay" id="dayModal">
+    <div class="modal-card modal-day">
+      <div class="day-modal-top">
+        <span class="day-modal-date" id="dayModalDia">—</span>
+        <button class="btn-close-x" id="btnFecharDia" aria-label="Fechar">✕</button>
+      </div>
+      <div class="day-modal-heading">
+        <h3>Horários</h3>
+      </div>
+      <div class="day-modal-toolbar">
+        <button class="btn-action" id="btnAddNesseDia">+ Novo horário</button>
+      </div>
+      <ul class="appointment-rows" id="dayAppointmentsList"></ul>
+      <p class="empty-state" id="dayEmpty">Nenhum horário cadastrado para este dia.</p>
+    </div>
+  </div>
+
+  <!-- MODAL: NOVO / EDITAR HORÁRIO -->
+  <div class="modal-overlay" id="appointmentModal">
+    <div class="modal-card">
+      <h3 id="appointmentModalTitle">Novo horário</h3>
+      <form id="formAppointment">
+        <div class="form-group">
+          <label for="apData">Data</label>
+          <input type="date" id="apData" required>
+          <p class="retroactive-warning" id="apRetroativoAviso" style="display:none;">⚠ Este horário está sendo registrado posteriormente à data informada.</p>
+        </div>
+        <div class="form-group">
+          <label for="apHora">Horário</label>
+          <input type="time" id="apHora" required>
+        </div>
+        <div class="form-group client-autocomplete-wrapper">
+          <label for="apClienteNome">Nome do cliente</label>
+          <input type="text" id="apClienteNome" placeholder="Ex: Maria Souza" autocomplete="off" required>
+          <ul class="client-suggestions" id="clientSuggestions"></ul>
+        </div>
+        <div class="form-group">
+          <label for="apClienteTelefone">Nº telefone</label>
+          <input type="tel" id="apClienteTelefone" placeholder="Ex: (11) 98888-0000">
+        </div>
+        <div class="form-group">
+          <label>Serviço(s)</label>
+          <div class="service-chips" id="apServicoChips"></div>
+        </div>
+        <div class="form-group">
+          <label for="apStatus">Status</label>
+          <select id="apStatus" required>
+            <option value="pendente">Pendente</option>
+            <option value="finalizado">Finalizado</option>
+            <option value="falta">Falta</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-action btn-danger" id="btnDeleteAppointment" style="display:none; margin-right:auto;">Excluir</button>
+          <button type="button" class="btn-cancel" id="btnCancelAppointment">Cancelar</button>
+          <button type="submit" class="btn-action">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CONFIGURAÇÕES DO USUÁRIO -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-card settings-card">
+      <h3>Configurações</h3>
+
+      <div class="settings-section">
+        <span class="settings-section-title">Foto de perfil</span>
+        <div class="settings-photo-row">
+          <div class="avatar avatar-lg" id="settingsAvatarPreview">BS</div>
+          <div class="settings-photo-actions">
+            <label for="settingsFotoInput" class="btn-action btn-secondary">Escolher foto</label>
+            <input type="file" id="settingsFotoInput" accept="image/*" hidden>
+            <button type="button" class="btn-link-danger" id="btnRemoverFotoPerfil">Remover foto</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <label for="settingsNome" class="settings-section-title">Trocar meu nome</label>
+        <form id="formSettingsNome" class="settings-name-form">
+          <input type="text" id="settingsNome" placeholder="Nome exibido no sistema" required>
+          <button type="submit" class="btn-action">Salvar</button>
+        </form>
+      </div>
+
+      <div class="settings-section">
+        <span class="settings-section-title">Tamanho da fonte</span>
+        <div class="settings-font-row">
+          <button type="button" class="btn-nav" id="btnFontDiminuir">A-</button>
+          <span id="fontScaleLabel">100%</span>
+          <button type="button" class="btn-nav" id="btnFontAumentar">A+</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <span class="settings-section-title">Outras configurações</span>
+        <label class="settings-switch-row">
+          <span>Reduzir animações da interface</span>
+          <input type="checkbox" id="settingsReduzirAnimacoes">
+        </label>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" id="btnFecharConfiguracoes">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../scripts/script.js"></script>
+</body>
+</html>
