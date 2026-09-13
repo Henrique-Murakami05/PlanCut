@@ -1316,3 +1316,130 @@ body.reduce-motion * {
   transition-duration: 0.001ms !important;
   animation-duration: 0.001ms !important;
 }
+
+/* =====================================================================
+   RESPONSIVIDADE (Celulares e Tablets)
+   ===================================================================== */
+@media (max-width: 768px) {
+  /* 1. Layout Principal */
+  body {
+    flex-direction: column;
+  }
+
+  main {
+    order: 1; /* O conteúdo principal fica na parte superior da tela */
+    padding-bottom: 15px;
+  }
+
+  /* 2. Barra Lateral transformada em Menu Inferior */
+  aside {
+    order: 2; /* Desce o menu para a base da tela */
+    width: 100%;
+    flex-direction: row;
+    padding: 10px;
+    box-shadow: 0 -4px 18px rgba(0, 48, 73, 0.15);
+    z-index: 100;
+    align-items: center;
+  }
+
+  aside > div {
+    flex: 1;
+    display: flex;
+    align-items: center;
+  }
+
+  .brand {
+    display: none; /* Oculta o logotipo para priorizar espaço para os botões */
+  }
+
+  .nav-menu {
+    flex-direction: row;
+    justify-content: space-around;
+    width: 100%;
+    gap: 4px;
+  }
+
+  .nav-item {
+    flex: 1;
+  }
+
+  .nav-item a {
+    padding: 10px 4px;
+    font-size: 12px;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .btn-logout {
+    width: auto;
+    padding: 10px 12px;
+    margin-left: 8px;
+    font-size: 11px;
+  }
+
+  /* 3. Área Principal e Cabeçalho */
+  .content-container {
+    grid-template-columns: 1fr; /* Força os painéis a ocuparem uma única coluna */
+    padding: 15px;
+    gap: 15px;
+  }
+
+  header {
+    padding: 15px;
+  }
+
+  header h1 {
+    font-size: 18px;
+  }
+
+  /* 4. Calendário */
+  .calendar-day {
+    height: 80px; /* Reduz a altura dos dias no calendário para caber melhor na tela */
+  }
+
+  .calendar-day-head {
+    font-size: 11px;
+    padding: 4px;
+  }
+  
+  .badge-event {
+    font-size: 9px;
+    padding: 2px 4px;
+  }
+
+  /* 5. Modais Responsivos */
+  .modal-card, .modal-day, .settings-card {
+    width: 95%;
+    padding: 20px;
+    max-height: 90vh;
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse; /* Empilha os botões Cancelar e Salvar */
+    gap: 10px;
+  }
+
+  .modal-actions button {
+    width: 100%;
+  }
+
+  /* 6. Ajustes de Formulários e Financeiro */
+  .stacked-form .form-row {
+    grid-template-columns: 1fr; /* Coloca os inputs lado a lado para cima e para baixo */
+  }
+
+  .finance-stats, .finance-period-row {
+    grid-template-columns: 1fr 1fr; /* Divide os cards financeiros em duas colunas no tablet/celular grande */
+  }
+}
+
+/* Ajuste extra para telas muito pequenas (smartphones pequenos) */
+@media (max-width: 480px) {
+  .finance-stats, .finance-period-row {
+    grid-template-columns: 1fr; /* Os cards financeiros ocupam a linha inteira */
+  }
+  
+  .nav-item a {
+    font-size: 10px;
+  }
+}
