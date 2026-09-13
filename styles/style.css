@@ -1392,19 +1392,60 @@ body.reduce-motion * {
     font-size: 18px;
   }
 
-  /* 4. Calendário */
-  .calendar-day {
-    height: 80px; /* Reduz a altura dos dias no calendário para caber melhor na tela */
+ /* 4. Calendário - Visualização Mobile (Estilo App) */
+  .calendar-grid {
+    gap: 4px; /* Reduz o espaço entre os dias */
   }
 
   .calendar-day-head {
-    font-size: 11px;
-    padding: 4px;
+    font-size: 12px;
+    padding: 4px 0;
   }
-  
+
+  .calendar-day {
+    height: 60px; /* Deixa o dia mais quadrado */
+    padding: 4px 2px;
+    border-radius: 8px; /* Tira o formato de "pílula" oval */
+    flex-direction: row; /* Prepara para colocar os pontinhos lado a lado */
+    flex-wrap: wrap;
+    justify-content: center;
+    align-content: flex-start;
+    gap: 3px;
+  }
+
+  /* Centraliza o número do dia no topo do quadradinho */
+  .calendar-day > span:first-child {
+    width: 100%;
+    text-align: center;
+    font-size: 14px;
+    margin-bottom: 2px;
+  }
+
+  /* Transforma as etiquetas de texto em pequenos pontos coloridos */
   .badge-event {
-    font-size: 9px;
-    padding: 2px 4px;
+    width: 8px;
+    height: 8px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 0;
+    color: transparent;
+  }
+
+  /* Oculta os textos de horário e serviço dentro dos pontos */
+  .badge-event .badge-event-time,
+  .badge-event .badge-event-service {
+    display: none;
+  }
+
+  /* Transforma o indicador de "+X mais" num pontinho neutro */
+  .badge-more {
+    width: 8px;
+    height: 8px;
+    padding: 0;
+    border-radius: 50%;
+    font-size: 0;
+    color: transparent;
+    background-color: #cbd5e1; /* Cor cinza clarinho */
   }
 
   /* 5. Modais Responsivos */
