@@ -190,10 +190,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const saldoSemanaEl = document.getElementById('saldoSemana');
   const saldoMesEl = document.getElementById('saldoMes');
   const saldoAnoEl = document.getElementById('saldoAno');
-  const financeTodayList = document.getElementById('financeTodayList');
-  const financeTodayEmpty = document.getElementById('financeTodayEmpty');
-  const financeList = document.getElementById('financeList');
-  const financeEmpty = document.getElementById('financeEmpty');
+
+  const atendimentoFiltroData = document.getElementById('atendimentoFiltroData');
+  const atendimentoFiltroMes = document.getElementById('atendimentoFiltroMes');
+  const atendimentoFiltroOrdem = document.getElementById('atendimentoFiltroOrdem');
+  const btnLimparFiltroAtendimento = document.getElementById('btnLimparFiltroAtendimento');
+  const atendimentoFiltroList = document.getElementById('atendimentoFiltroList');
+  const atendimentoFiltroEmpty = document.getElementById('atendimentoFiltroEmpty');
+  const atendimentoFiltroCount = document.getElementById('atendimentoFiltroCount');
+  const atendimentoFiltroTotal = document.getElementById('atendimentoFiltroTotal');
 
   const resumoReceitaEl = document.getElementById('resumoReceita');
   const resumoDespesasEl = document.getElementById('resumoDespesas');
@@ -557,45 +562,62 @@ document.addEventListener('DOMContentLoaded', () => {
       resumoSaldoBox.classList.toggle('is-negative', saldoMesGeral < 0);
     }
 
-    // Agendamentos de hoje (qualquer status), para acompanhamento do dia
-    financeTodayList.innerHTML = '';
-    const todaysAppointments = (appointments[todayKey] || []).slice().sort((a, b) => a.time.localeCompare(b.time));
-    financeTodayEmpty.style.display = todaysAppointments.length ? 'none' : 'block';
-
-    todaysAppointments.forEach(evt => {
-      const li = document.createElement('li');
-      li.className = 'category-item';
-      li.innerHTML = `
-        <span>${evt.time} · ${evt.clientName || 'Cliente não informado'} · ${evt.services.join(' + ')} <span class="finance-value">${formatCurrency(priceOfServices(evt.services))}</span></span>
-        <span class="status-pill status-${evt.status}">${capitalize(evt.status)}</span>
-      `;
-      financeTodayList.appendChild(li);
-    });
-
-    // Últimos atendimentos finalizados (qualquer data), mais recentes primeiro
-    financeList.innerHTML = '';
-    const finalizados = [];
-    Object.keys(appointments).forEach(key => {
-      appointments[key].forEach(evt => {
-        if (evt.status === 'finalizado') finalizados.push({ key, ...evt });
-      });
-    });
-    finalizados.sort((a, b) => `${b.key}${b.time}`.localeCompare(`${a.key}${a.time}`));
-
-    financeEmpty.style.display = finalizados.length ? 'none' : 'block';
-
-    finalizados.slice(0, 20).forEach(entry => {
-      const li = document.createElement('li');
-      li.className = 'category-item';
-      li.innerHTML = `
-        <span>${formatShortDate(entry.key)} · ${entry.time} · ${entry.clientName || 'Cliente não informado'} · ${entry.services.join(' + ')}</span>
-        <strong class="finance-value">${formatCurrency(priceOfServices(entry.services))}</strong>
-      `;
-      financeList.appendChild(li);
-    });
-
     renderExpenses();
     renderProducts();
+    renderFinanceAtendimentoSearch();
+  }
+
+  // ---------------------------------------------------------------------
+  // RENDER: ABA "ATENDIMENTO" (busca por data específica ou por mês)
+  // ---------------------------------------------------------------------
+  function renderFinanceAtendimentoSearch() {
+    if (!atendimentoFiltroList) return;
+
+    const filtroData = atendimentoFiltroData.value; // 'YYYY-MM-DD' ou ''
+    const filtroMes = atendimentoFiltroMes.value;   // 'YYYY-MM' ou ''
+
+    atendimentoFiltroList.innerHTML = '';
+
+    if (!filtroData && !filtroMes) {
+      atendimentoFiltroEmpty.innerText = 'Selecione uma data ou um mês acima para pesquisar os atendimentos.';
+      atendimentoFiltroEmpty.style.display = 'block';
+      atendimentoFiltroCount.innerText = '0';
+      atendimentoFiltroTotal.innerText = formatCurrency(0);
+      return;
+    }
+
+    const encontrados = [];
+    Object.keys(appointments).forEach(key => {
+      const bateData = filtroData ? key === filtroData : key.startsWith(filtroMes);
+      if (!bateData) return;
+      appointments[key].forEach(evt => encontrados.push({ key, ...evt }));
+    });
+
+    // 'desc' = mais recentes primeiro (padrão) | 'asc' = mais antigos primeiro
+    const ordemAsc = atendimentoFiltroOrdem && atendimentoFiltroOrdem.value === 'asc';
+    encontrados.sort((a, b) => {
+      const cmp = `${a.key}${a.time}`.localeCompare(`${b.key}${b.time}`);
+      return ordemAsc ? cmp : -cmp;
+    });
+
+    atendimentoFiltroEmpty.innerText = 'Nenhum atendimento encontrado para o filtro selecionado.';
+    atendimentoFiltroEmpty.style.display = encontrados.length ? 'none' : 'block';
+
+    let total = 0;
+    encontrados.forEach(entry => {
+      const valor = priceOfServices(entry.services);
+      total += valor;
+      const li = document.createElement('li');
+      li.className = 'category-item';
+      li.innerHTML = `
+        <span>${formatShortDate(entry.key)} · ${entry.time} · ${entry.clientName || 'Cliente não informado'} · ${entry.services.join(' + ')} <span class="finance-value">${formatCurrency(valor)}</span></span>
+        <span class="status-pill status-${entry.status}">${capitalize(entry.status)}</span>
+      `;
+      atendimentoFiltroList.appendChild(li);
+    });
+
+    atendimentoFiltroCount.innerText = String(encontrados.length);
+    atendimentoFiltroTotal.innerText = formatCurrency(total);
   }
 
   // ---------------------------------------------------------------------
@@ -660,6 +682,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const pages = {
     dashboard: document.getElementById('page-dashboard'),
     financeiro: document.getElementById('page-financeiro'),
+    atendimento: document.getElementById('page-atendimento'),
     clientes: document.getElementById('page-clientes'),
     historico: document.getElementById('page-historico')
   };
@@ -667,6 +690,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const pageLabels = {
     dashboard: 'Dashboard · Agenda',
     financeiro: 'Financeiro · Saldo',
+    atendimento: 'Atendimento',
     clientes: 'Clientes',
     historico: 'Histórico'
   };
@@ -679,7 +703,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (pageName === 'historico') renderHistorico();
     if (pageName === 'clientes') renderClients();
-    if (pageName === 'financeiro') renderFinance();
+    if (pageName === 'financeiro' || pageName === 'atendimento') renderFinance();
   }
 
   navItems.forEach(item => {
@@ -701,6 +725,41 @@ document.addEventListener('DOMContentLoaded', () => {
       window.location.href = 'login.html';
     }
   });
+
+  // ---------------------------------------------------------------------
+  // MENU HAMBÚRGUER (celulares até 400px: o menu lateral vira uma gaveta)
+  // ---------------------------------------------------------------------
+  const btnMenu = document.getElementById('btnMenu');
+  const btnFecharMenu = document.getElementById('btnFecharMenu');
+  const drawerBackdrop = document.getElementById('drawerBackdrop');
+  const sidebar = document.getElementById('sidebar');
+  const menuAberto = () => document.body.classList.contains('menu-open');
+
+  function abrirMenu() {
+    document.body.classList.add('menu-open');
+    btnMenu.setAttribute('aria-expanded', 'true');
+    btnFecharMenu.focus();
+  }
+
+  function fecharMenu(devolverFoco) {
+    if (!menuAberto()) return;
+    document.body.classList.remove('menu-open');
+    btnMenu.setAttribute('aria-expanded', 'false');
+    if (devolverFoco) btnMenu.focus();
+  }
+
+  if (btnMenu && sidebar) {
+    btnMenu.addEventListener('click', () => (menuAberto() ? fecharMenu(true) : abrirMenu()));
+    btnFecharMenu.addEventListener('click', () => fecharMenu(true));
+    drawerBackdrop.addEventListener('click', () => fecharMenu(true));
+    // escolher uma página fecha a gaveta
+    sidebar.querySelectorAll('.nav-item a').forEach(a => a.addEventListener('click', () => fecharMenu(false)));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') fecharMenu(true);
+    });
+    // se a tela crescer (ex.: girar o celular), a gaveta deixa de existir
+    window.matchMedia('(max-width: 400px)').addEventListener('change', () => fecharMenu(false));
+  }
 
   // ---------------------------------------------------------------------
   // MODAL: EXCLUSÃO DE CATEGORIA
@@ -1227,10 +1286,322 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('tabBtnProdutos')
   ].filter(Boolean));
 
-  setupFinanceTabs([
-    document.getElementById('tabBtnHoje'),
-    document.getElementById('tabBtnFinalizados')
-  ].filter(Boolean));
+  // ---------------------------------------------------------------------
+  // SELETORES CUSTOMIZADOS DE DATA / MÊS (usados nos filtros da aba "Pesquisar")
+  // Guardam o valor num <input type="hidden"> no mesmo formato dos inputs nativos:
+  //   modo 'date'  -> 'YYYY-MM-DD'
+  //   modo 'month' -> 'YYYY-MM'
+  // ---------------------------------------------------------------------
+  const PICKER_MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+  const PICKER_MESES_CURTOS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+  const PICKER_DIAS_SEMANA = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
+  const PICKER_CHEVRON = (dir) => `<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${dir < 0 ? 'M15 5l-7 7 7 7' : 'M9 5l7 7-7 7'}"/></svg>`;
+
+  const abertos = new Set(); // garante que só um seletor fique aberto por vez
+
+  // Posiciona o popover dentro da área visível: abre para cima se faltar espaço embaixo,
+  // alinha pela direita se passar da tela e, se ainda não couber, rola a página até ele aparecer
+  function posicionarPopover(trigger, pop) {
+    pop.classList.remove('open-up', 'align-right');
+
+    // a área que rola é o <main>; o espaço útil é o que está visível dentro dele
+    const area = (pop.closest('main') || document.documentElement).getBoundingClientRect();
+    const limiteTopo = Math.max(area.top, 0);
+    const limiteBase = Math.min(area.bottom, window.innerHeight);
+    const rect = trigger.getBoundingClientRect();
+    const abaixo = limiteBase - rect.bottom;
+    const acima = rect.top - limiteTopo;
+
+    if (abaixo < pop.offsetHeight + 16 && acima > abaixo) pop.classList.add('open-up');
+    if (pop.getBoundingClientRect().right > window.innerWidth - 8) pop.classList.add('align-right');
+
+    const mostrar = () => pop.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    mostrar();
+    // a animação de entrada muda o tamanho do popover: repete o ajuste quando ela termina
+    pop.addEventListener('animationend', mostrar, { once: true });
+  }
+
+  function createPicker(root, mode, onChange) {
+    const hidden = root.querySelector('input[type="hidden"]');
+    const trigger = root.querySelector('.picker-trigger');
+    const valueEl = root.querySelector('.picker-value');
+    const pop = root.querySelector('.picker-popover');
+    const placeholder = valueEl.dataset.placeholder;
+    let viewYear = 0;
+    let viewMonth = 0;
+
+    function parseValue() {
+      if (!hidden.value) return null;
+      const [y, m, d] = hidden.value.split('-').map(Number);
+      return { y, m: m - 1, d: d || 1 };
+    }
+
+    function updateDisplay() {
+      const v = parseValue();
+      valueEl.classList.toggle('is-placeholder', !v);
+      if (!v) {
+        valueEl.textContent = placeholder;
+        return;
+      }
+      valueEl.textContent = mode === 'date'
+        ? `${pad2(v.d)}/${pad2(v.m + 1)}/${v.y}`
+        : `${PICKER_MESES[v.m]} de ${v.y}`;
+    }
+
+    function render() {
+      const hoje = new Date();
+      const hojeKey = dateKey(hoje);
+      const mesAtualKey = `${hoje.getFullYear()}-${pad2(hoje.getMonth() + 1)}`;
+      let corpo = '';
+      let titulo = '';
+      let rodapeHoje = '';
+
+      if (mode === 'date') {
+        titulo = `${PICKER_MESES[viewMonth]} De ${viewYear}`;
+        rodapeHoje = 'Hoje';
+
+        const offset = new Date(viewYear, viewMonth, 1).getDay();
+        const diasNoMes = new Date(viewYear, viewMonth + 1, 0).getDate();
+        const semanas = Math.ceil((offset + diasNoMes) / 7);
+
+        corpo += `<div class="picker-weekdays">${PICKER_DIAS_SEMANA.map(d => `<span>${d}</span>`).join('')}</div>`;
+        corpo += '<div class="picker-days">';
+        for (let i = 0; i < semanas * 7; i++) {
+          const d = new Date(viewYear, viewMonth, 1 - offset + i);
+          const key = dateKey(d);
+          const cls = ['picker-day'];
+          if (d.getMonth() !== viewMonth) cls.push('is-outside');
+          if (key === hojeKey) cls.push('is-today');
+          if (key === hidden.value) cls.push('is-selected');
+          const rotulo = `${d.getDate()} de ${PICKER_MESES[d.getMonth()].toLowerCase()} de ${d.getFullYear()}`;
+          corpo += `<button type="button" class="${cls.join(' ')}" data-value="${key}" aria-label="${rotulo}">${d.getDate()}</button>`;
+        }
+        corpo += '</div>';
+      } else {
+        titulo = String(viewYear);
+        rodapeHoje = 'Este mês';
+
+        corpo += '<div class="picker-months">';
+        PICKER_MESES_CURTOS.forEach((nome, i) => {
+          const key = `${viewYear}-${pad2(i + 1)}`;
+          const cls = ['picker-month'];
+          if (key === mesAtualKey) cls.push('is-today');
+          if (key === hidden.value) cls.push('is-selected');
+          corpo += `<button type="button" class="${cls.join(' ')}" data-value="${key}" aria-label="${PICKER_MESES[i]} de ${viewYear}">${nome}</button>`;
+        });
+        corpo += '</div>';
+      }
+
+      pop.innerHTML = `
+        <div class="picker-head">
+          <button type="button" class="picker-nav" data-nav="-1" aria-label="${mode === 'date' ? 'Mês anterior' : 'Ano anterior'}">${PICKER_CHEVRON(-1)}</button>
+          <span class="picker-title" aria-live="polite">${titulo}</span>
+          <button type="button" class="picker-nav" data-nav="1" aria-label="${mode === 'date' ? 'Próximo mês' : 'Próximo ano'}">${PICKER_CHEVRON(1)}</button>
+        </div>
+        ${corpo}
+        <div class="picker-footer">
+          <button type="button" class="picker-action" data-action="clear">Limpar</button>
+          <button type="button" class="picker-action" data-action="today">${rodapeHoje}</button>
+        </div>
+      `;
+    }
+
+    function close() {
+      pop.hidden = true;
+      root.classList.remove('is-open');
+      trigger.setAttribute('aria-expanded', 'false');
+      abertos.delete(api);
+    }
+
+    function open() {
+      abertos.forEach(p => p.close());
+      const v = parseValue();
+      const base = v ? new Date(v.y, v.m, 1) : new Date();
+      viewYear = base.getFullYear();
+      viewMonth = base.getMonth();
+      render();
+
+      pop.hidden = false;
+      root.classList.add('is-open');
+      trigger.setAttribute('aria-expanded', 'true');
+      abertos.add(api);
+      posicionarPopover(trigger, pop);
+    }
+
+    function setValue(valor, notificar) {
+      hidden.value = valor;
+      updateDisplay();
+      if (notificar && onChange) onChange(valor);
+    }
+
+    function navegar(dir) {
+      if (mode === 'date') {
+        viewMonth += dir;
+        if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+        if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+      } else {
+        viewYear += dir;
+      }
+      render();
+      // o render recria os botões: devolve o foco para quem usa teclado
+      const btn = pop.querySelector(`[data-nav="${dir}"]`);
+      if (btn && document.activeElement === document.body) btn.focus();
+    }
+
+    trigger.addEventListener('click', () => (pop.hidden ? open() : close()));
+
+    pop.addEventListener('click', (e) => {
+      const nav = e.target.closest('[data-nav]');
+      if (nav) {
+        navegar(Number(nav.dataset.nav));
+        return;
+      }
+
+      const escolha = e.target.closest('[data-value]');
+      if (escolha) {
+        setValue(escolha.dataset.value, true);
+        close();
+        trigger.focus();
+        return;
+      }
+
+      const acao = e.target.closest('[data-action]');
+      if (!acao) return;
+
+      if (acao.dataset.action === 'clear') {
+        setValue('', true);
+      } else {
+        const hoje = new Date();
+        setValue(mode === 'date' ? dateKey(hoje) : `${hoje.getFullYear()}-${pad2(hoje.getMonth() + 1)}`, true);
+      }
+      close();
+      trigger.focus();
+    });
+
+    root.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !pop.hidden) {
+        close();
+        trigger.focus();
+      }
+    });
+
+    // Fecha ao clicar fora (pointerdown acontece antes do render, então o alvo ainda está no DOM)
+    document.addEventListener('pointerdown', (e) => {
+      if (!pop.hidden && !root.contains(e.target)) close();
+    });
+
+    const api = { setValue, close };
+    updateDisplay();
+    return api;
+  }
+
+  // Lista suspensa no mesmo visual dos seletores (usada em "Ordenar por horário")
+  function createSelect(root, onChange) {
+    const hidden = root.querySelector('input[type="hidden"]');
+    const trigger = root.querySelector('.picker-trigger');
+    const valueEl = root.querySelector('.picker-value');
+    const pop = root.querySelector('.picker-popover');
+    const opcoes = Array.from(pop.querySelectorAll('.picker-option'));
+
+    function updateDisplay() {
+      const atual = opcoes.find(o => o.dataset.value === hidden.value) || opcoes[0];
+      valueEl.textContent = atual.textContent.trim();
+      opcoes.forEach(o => {
+        const ativo = o === atual;
+        o.classList.toggle('is-selected', ativo);
+        o.setAttribute('aria-selected', String(ativo));
+      });
+    }
+
+    function close() {
+      pop.hidden = true;
+      root.classList.remove('is-open');
+      trigger.setAttribute('aria-expanded', 'false');
+      abertos.delete(api);
+    }
+
+    function open() {
+      abertos.forEach(p => p.close());
+      pop.hidden = false;
+      root.classList.add('is-open');
+      trigger.setAttribute('aria-expanded', 'true');
+      abertos.add(api);
+      posicionarPopover(trigger, pop);
+    }
+
+    function setValue(valor, notificar) {
+      hidden.value = valor;
+      updateDisplay();
+      if (notificar && onChange) onChange(valor);
+    }
+
+    trigger.addEventListener('click', () => (pop.hidden ? open() : close()));
+
+    pop.addEventListener('click', (e) => {
+      const opcao = e.target.closest('.picker-option');
+      if (!opcao) return;
+      setValue(opcao.dataset.value, true);
+      close();
+      trigger.focus();
+    });
+
+    root.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !pop.hidden) {
+        close();
+        trigger.focus();
+      }
+    });
+
+    document.addEventListener('pointerdown', (e) => {
+      if (!pop.hidden && !root.contains(e.target)) close();
+    });
+
+    const api = { setValue, close };
+    updateDisplay();
+    return api;
+  }
+
+  // Filtros da página "Atendimento": data específica, mês e ordenação
+  const pickerDataEl = document.getElementById('pickerFiltroData');
+  const pickerMesEl = document.getElementById('pickerFiltroMes');
+  const pickerOrdemEl = document.getElementById('pickerFiltroOrdem');
+  let pickerData = null;
+  let pickerMes = null;
+  let pickerOrdem = null;
+
+  // Estado padrão: data específica = hoje, sem mês, mais recentes primeiro
+  function restaurarFiltrosPadrao() {
+    if (pickerData) pickerData.setValue(todayKey, false);
+    if (pickerMes) pickerMes.setValue('', false);
+    if (pickerOrdem) pickerOrdem.setValue('desc', false);
+  }
+
+  if (pickerDataEl && pickerMesEl) {
+    // Escolher uma data específica ignora (e limpa) o filtro por mês, e vice-versa
+    pickerData = createPicker(pickerDataEl, 'date', (valor) => {
+      if (valor) pickerMes.setValue('', false);
+      renderFinanceAtendimentoSearch();
+    });
+    pickerMes = createPicker(pickerMesEl, 'month', (valor) => {
+      if (valor) pickerData.setValue('', false);
+      renderFinanceAtendimentoSearch();
+    });
+  }
+
+  if (pickerOrdemEl) {
+    pickerOrdem = createSelect(pickerOrdemEl, () => renderFinanceAtendimentoSearch());
+  }
+
+  if (btnLimparFiltroAtendimento) {
+    // "Limpar filtro" volta ao estado padrão (dia de hoje)
+    btnLimparFiltroAtendimento.addEventListener('click', () => {
+      restaurarFiltrosPadrao();
+      renderFinanceAtendimentoSearch();
+    });
+  }
+
+  restaurarFiltrosPadrao();
+  renderFinanceAtendimentoSearch();
 
   // ---------------------------------------------------------------------
   // PAINEL DE CONFIGURAÇÕES DO USUÁRIO

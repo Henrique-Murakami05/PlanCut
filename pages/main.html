@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>PlanCut - Gerenciamento e Controle de Agenda</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -11,7 +11,9 @@
 <body>
 
   <!-- NAVEGAÇÃO LATERAL (SIDEBAR) -->
-  <aside>
+  <aside id="sidebar">
+    <!-- Botão de fechar: só aparece quando o menu vira gaveta (celulares pequenos) -->
+    <button type="button" class="drawer-close" id="btnFecharMenu" aria-label="Fechar menu">✕</button>
     <div>
       <div class="brand">
         ✂ PlanCut
@@ -19,6 +21,7 @@
       <ul class="nav-menu">
         <li class="nav-item active"><a href="#" data-page="dashboard">Dashboard</a></li>
         <li class="nav-item"><a href="#" data-page="financeiro">Financeiro</a></li>
+        <li class="nav-item"><a href="#" data-page="atendimento">Atendimento</a></li>
         <li class="nav-item"><a href="#" data-page="clientes">Clientes</a></li>
         <li class="nav-item"><a href="#" data-page="historico">Histórico</a></li>
       </ul>
@@ -26,11 +29,18 @@
     <button class="btn-logout" id="btnLogout">LOGOUT</button>
   </aside>
 
+  <!-- Fundo escuro atrás da gaveta do menu (celulares pequenos) -->
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+
   <!-- ÁREA PRINCIPAL DO SISTEMA -->
   <main>
     <header>
+      <!-- Menu hambúrguer: só aparece em celulares pequenos -->
+      <button type="button" class="btn-menu" id="btnMenu" aria-label="Abrir menu" aria-expanded="false" aria-controls="sidebar">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
       <h1 id="pageTitle">Dashboard · Agenda</h1>
-      <button type="button" class="user-profile" id="btnAbrirConfiguracoes" title="Configurações">
+      <button type="button" class="user-profile" id="btnAbrirConfiguracoes" title="Configurações" aria-label="Abrir configurações">
         <span id="userDisplayName">Barbearia Silva</span>
         <div class="avatar" id="userAvatar">BS</div>
       </button>
@@ -209,26 +219,61 @@
           <p class="empty-state" id="productEmpty">Nenhum produto cadastrado ainda.</p>
         </div>
       </section>
+    </div>
 
-      <!-- ATIVIDADE DE ATENDIMENTOS EM ABAS -->
+    <!-- PÁGINA: ATENDIMENTO -->
+    <div class="content-container single-col" id="page-atendimento" style="display:none;">
       <section class="card">
         <div class="card-title">
           <span>Atividade de atendimentos</span>
         </div>
 
-        <div class="finance-tabs" role="tablist">
-          <button type="button" class="finance-tab active" id="tabBtnHoje" data-target="tabPanelHoje">Hoje</button>
-          <button type="button" class="finance-tab" id="tabBtnFinalizados" data-target="tabPanelFinalizados">Últimos finalizados</button>
-        </div>
-
-        <div class="finance-tab-panel" id="tabPanelHoje">
-          <ul class="category-list" id="financeTodayList"></ul>
-          <p class="empty-state" id="financeTodayEmpty">Nenhum agendamento para hoje.</p>
-        </div>
-
-        <div class="finance-tab-panel" id="tabPanelFinalizados" hidden>
-          <ul class="category-list" id="financeList"></ul>
-          <p class="empty-state" id="financeEmpty">Nenhum atendimento finalizado ainda.</p>
+        <div id="tabPanelAtendimento">
+          <div class="finance-filter-row">
+            <div class="form-group">
+              <label for="atendimentoFiltroDataBtn">Data específica</label>
+              <div class="picker" id="pickerFiltroData">
+                <button type="button" class="picker-trigger" id="atendimentoFiltroDataBtn" aria-haspopup="dialog" aria-expanded="false">
+                  <span class="picker-value is-placeholder" data-placeholder="Selecionar data">Selecionar data</span>
+                  <svg class="picker-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 10h18M8 2.5v4M16 2.5v4"/></svg>
+                </button>
+                <input type="hidden" id="atendimentoFiltroData">
+                <div class="picker-popover" role="dialog" aria-label="Escolher data" hidden></div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="atendimentoFiltroMesBtn">Mês</label>
+              <div class="picker" id="pickerFiltroMes">
+                <button type="button" class="picker-trigger" id="atendimentoFiltroMesBtn" aria-haspopup="dialog" aria-expanded="false">
+                  <span class="picker-value is-placeholder" data-placeholder="Selecionar mês">Selecionar mês</span>
+                  <svg class="picker-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M3 10h18M8 2.5v4M16 2.5v4"/></svg>
+                </button>
+                <input type="hidden" id="atendimentoFiltroMes">
+                <div class="picker-popover" role="dialog" aria-label="Escolher mês" hidden></div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="atendimentoFiltroOrdemBtn">Ordenar por horário</label>
+              <div class="picker" id="pickerFiltroOrdem">
+                <button type="button" class="picker-trigger" id="atendimentoFiltroOrdemBtn" aria-haspopup="listbox" aria-expanded="false">
+                  <span class="picker-value">Mais recentes primeiro</span>
+                  <svg class="picker-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16M7 20l-3.5-3.5M7 20l3.5-3.5M17 20V4M17 4l-3.5 3.5M17 4l3.5 3.5"/></svg>
+                </button>
+                <input type="hidden" id="atendimentoFiltroOrdem" value="desc">
+                <div class="picker-popover picker-popover-list" role="listbox" aria-label="Ordenar por horário" hidden>
+                  <button type="button" class="picker-option" role="option" data-value="desc">Mais recentes primeiro</button>
+                  <button type="button" class="picker-option" role="option" data-value="asc">Mais antigos primeiro</button>
+                </div>
+              </div>
+            </div>
+            <button type="button" class="btn-toggle-form" id="btnLimparFiltroAtendimento">Limpar filtro</button>
+          </div>
+          <p class="finance-hint">Preenchendo uma data específica, o filtro por mês é ignorado.</p>
+          <div class="finance-list-header">
+            <span class="finance-list-total">Encontrados: <strong id="atendimentoFiltroCount">0</strong> · Total: <strong id="atendimentoFiltroTotal">R$ 0,00</strong></span>
+          </div>
+          <ul class="category-list" id="atendimentoFiltroList"></ul>
+          <p class="empty-state" id="atendimentoFiltroEmpty">Selecione uma data ou um mês acima para pesquisar os atendimentos.</p>
         </div>
       </section>
     </div>
@@ -362,18 +407,18 @@
 
   <!-- MODAL: NOVO / EDITAR HORÁRIO -->
   <div class="modal-overlay" id="appointmentModal">
-    <div class="modal-card">
+    <div class="modal-card modal-appointment">
       <h3 id="appointmentModalTitle">Novo horário</h3>
-      <form id="formAppointment">
+      <form id="formAppointment" class="form-grid">
         <div class="form-group">
           <label for="apData">Data</label>
           <input type="date" id="apData" required>
-          <p class="retroactive-warning" id="apRetroativoAviso" style="display:none;">⚠ Este horário está sendo registrado posteriormente à data informada.</p>
         </div>
         <div class="form-group">
           <label for="apHora">Horário</label>
           <input type="time" id="apHora" required>
         </div>
+        <p class="retroactive-warning form-span" id="apRetroativoAviso" style="display:none;">⚠ Este horário está sendo registrado posteriormente à data informada.</p>
         <div class="form-group client-autocomplete-wrapper">
           <label for="apClienteNome">Nome do cliente</label>
           <input type="text" id="apClienteNome" placeholder="Ex: Maria Souza" autocomplete="off" required>
@@ -383,11 +428,11 @@
           <label for="apClienteTelefone">Nº telefone</label>
           <input type="tel" id="apClienteTelefone" placeholder="Ex: (11) 98888-0000">
         </div>
-        <div class="form-group">
+        <div class="form-group form-span">
           <label>Serviço(s)</label>
           <div class="service-chips" id="apServicoChips"></div>
         </div>
-        <div class="form-group">
+        <div class="form-group form-span">
           <label for="apStatus">Status</label>
           <select id="apStatus" required>
             <option value="pendente">Pendente</option>
@@ -395,7 +440,7 @@
             <option value="falta">Falta</option>
           </select>
         </div>
-        <div class="modal-actions">
+        <div class="modal-actions form-span">
           <button type="button" class="btn-action btn-danger" id="btnDeleteAppointment" style="display:none; margin-right:auto;">Excluir</button>
           <button type="button" class="btn-cancel" id="btnCancelAppointment">Cancelar</button>
           <button type="submit" class="btn-action">Salvar</button>

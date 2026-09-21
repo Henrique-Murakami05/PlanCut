@@ -3,7 +3,10 @@
    --------------------------------------------------------------------- */
 
 .auth-body {
-  overflow: auto;
+  height: auto;
+  min-height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* PAINEL DE MARCA (lado com a "imagem de fundo") */
@@ -163,11 +166,92 @@
   text-decoration: underline;
 }
 
+/* NOTEBOOKS / TELAS MÉDIAS: reduz o painel ilustrado para dar mais espaço
+   ao formulário e evita que o card fique espremido em janelas ~900-1200px */
+@media (max-width: 1200px) {
+  .auth-bg {
+    flex: 1;
+    padding: 44px;
+  }
+  .auth-bg-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
+  .auth-bg-content h2 {
+    font-size: 23px;
+  }
+  .auth-bg-content p {
+    font-size: 14px;
+  }
+  .auth-panel {
+    flex: 1;
+    padding: 32px 20px;
+    min-width: 300px;
+  }
+  .auth-card {
+    padding: 32px 28px;
+  }
+}
+
 @media (max-width: 800px) {
   .auth-bg {
     display: none;
   }
   .auth-panel {
     flex: 1;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 420px) {
+  .auth-panel {
+    padding: 28px 14px;
+  }
+  .auth-card {
+    padding: 26px 20px;
+  }
+  .auth-logo {
+    width: 56px;
+    height: 56px;
+    font-size: 24px;
+    margin-bottom: 14px;
+  }
+  .auth-card h1 {
+    font-size: 21px;
+  }
+}
+
+/* TELAS DE POUCA ALTURA (notebooks com barra de tarefas/abas ocupando espaço,
+   ou zoom/escala do sistema ativos): compacta o card e some com a ilustração
+   para que o formulário caiba sem precisar rolar a página */
+@media (max-height: 700px) {
+  .auth-bg {
+    display: none;
+  }
+  .auth-panel {
+    padding: 20px;
+    min-width: 0;
+  }
+  .auth-card {
+    padding: 24px 28px;
+  }
+  .auth-logo {
+    width: 50px;
+    height: 50px;
+    font-size: 22px;
+    margin-bottom: 10px;
+  }
+  .auth-card h1 {
+    font-size: 20px;
+    margin-bottom: 4px;
+  }
+  .auth-subtitle {
+    margin-bottom: 16px;
+  }
+  .auth-card .form-group {
+    margin-bottom: 10px;
+  }
+  .auth-switch {
+    margin-top: 14px;
   }
 }
