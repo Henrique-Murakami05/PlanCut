@@ -298,6 +298,19 @@ header h1 {
 .calendar-day > span:first-child {
   font-weight: 700;
   color: var(--color-heading);
+  flex-shrink: 0;
+}
+
+/* Container dos horários dentro do dia: ocupa o espaço restante da célula
+   e nunca deixa um item "pela metade" — o JS mede a altura real disponível
+   e decide quantos horários cabem, resumindo o resto no badge "+N mais". */
+.calendar-day-events {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .calendar-day:hover {
@@ -351,7 +364,10 @@ header h1 {
 .badge-event.finalizado { background-color: rgb(87, 196, 15); color: white; }
 
 .badge-more {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   font-size: 10px;
   font-weight: 700;
   color: var(--color-heading);
@@ -360,10 +376,20 @@ header h1 {
   border-radius: var(--radius-pill);
   text-align: center;
   flex-shrink: 0;
+  transition: background-color 0.2s, transform 0.15s var(--bounce);
+}
+
+/* Três pontinhos antes do texto, reforçando visualmente "tem mais aqui" */
+.badge-more::before {
+  content: '\2022\2022\2022';
+  letter-spacing: 1px;
+  font-size: 8px;
+  opacity: 0.7;
 }
 
 .calendar-day:hover .badge-more {
   background-color: rgba(0, 48, 73, 0.16);
+  transform: scale(1.04);
 }
 
 /* PAINEL LATERAL DIREITO - CATEGORIAS E STATUS */
@@ -1981,11 +2007,7 @@ body.reduce-motion * {
     height: 60px; /* Deixa o dia mais quadrado */
     padding: 4px 2px;
     border-radius: 8px; /* Tira o formato de "pílula" oval */
-    flex-direction: row; /* Prepara para colocar os pontinhos lado a lado */
-    flex-wrap: wrap;
-    justify-content: center;
-    align-content: flex-start;
-    gap: 3px;
+    gap: 2px;
   }
 
   /* Centraliza o número do dia no topo do quadradinho */
@@ -1993,7 +2015,15 @@ body.reduce-motion * {
     width: 100%;
     text-align: center;
     font-size: 14px;
-    margin-bottom: 2px;
+  }
+
+  /* Os pontinhos ficam lado a lado, centralizados, quebrando linha quando
+     necessário — o JS já garante que só aparecem os que cabem na altura. */
+  .calendar-day-events {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-content: flex-start;
   }
 
   /* Transforma as etiquetas de texto em pequenos pontos coloridos */
@@ -2012,15 +2042,20 @@ body.reduce-motion * {
     display: none;
   }
 
-  /* Transforma o indicador de "+X mais" num pontinho neutro */
+  /* Transforma o indicador de "+X mais" num pontinho neutro, um pouco maior
+     que os pontinhos de horário para ficar claro que ali há mais itens. */
   .badge-more {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     padding: 0;
     border-radius: 50%;
     font-size: 0;
     color: transparent;
-    background-color: #cbd5e1; /* Cor cinza clarinho */
+    background-color: #64748b; /* Mais escuro que os pontinhos normais, para se destacar */
+  }
+
+  .badge-more::before {
+    content: none; /* No modo "pontinho" o ícone de reticências não cabe nem faz sentido */
   }
 
   /* 5. Modais Responsivos */
