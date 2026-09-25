@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ESTADO DA APLICAÇÃO (em memória)
   // ---------------------------------------------------------------------
   let userSettings = {
-    name: 'Barbearia Silva',
+    name: 'Usuário',
     photoDataUrl: null,   // dataURL da foto de perfil (null = usa as iniciais do nome)
     fontScale: 1          // 0.85 a 1.3
   };
@@ -258,6 +258,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const daysInPrevMonth = new Date(year, month, 0).getDate();
     const totalCells = Math.ceil((startOffset + daysInMonth) / 7) * 7;
 
+    // Dias cujos horários ainda precisam ser "encaixados" visualmente
+    // (só conseguimos medir a altura real depois que a célula estiver no DOM).
+    const pendingFits = [];
+
     for (let i = 0; i < totalCells; i++) {
       const dayNumber = i - startOffset + 1;
       let cellDate;
@@ -285,32 +289,74 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Os horários aparecem apenas como indicação visual dentro do dia;
       // não são clicáveis individualmente — só o dia inteiro abre a lista de horários.
-      // Para não quebrar o layout em dias muito cheios, mostramos no máximo
-      // MAX_VISIBLE_BADGES horários e resumimos o restante em "+N mais".
-      const MAX_VISIBLE_BADGES = 3;
       const dayEvents = (appointments[key] || []).slice().sort((a, b) => a.time.localeCompare(b.time));
-      const visibleEvents = dayEvents.slice(0, MAX_VISIBLE_BADGES);
-      const extraCount = dayEvents.length - visibleEvents.length;
 
-      visibleEvents.forEach(evt => {
-        const badge = document.createElement('span');
-        badge.className = `badge-event ${evt.status}`;
-        badge.title = `${evt.time} - ${evt.services.join(' + ')}`;
-        badge.innerHTML = `
-          <span class="badge-event-time">${evt.time}</span>
-          <span class="badge-event-service">${evt.services.join(' + ')}</span>
-        `;
-        dayDiv.appendChild(badge);
-      });
+      if (dayEvents.length) {
+        const eventsBox = document.createElement('div');
+        eventsBox.className = 'calendar-day-events';
+        dayDiv.appendChild(eventsBox);
 
-      if (extraCount > 0) {
-        const more = document.createElement('span');
-        more.className = 'badge-more';
-        more.innerText = `+${extraCount} mais`;
-        dayDiv.appendChild(more);
+        // Precisamos que o dia já esteja no DOM (com altura real) para medir
+        // corretamente quantos horários cabem — por isso isso é feito depois
+        // do appendChild no calendarGrid, logo abaixo.
+        pendingFits.push({ eventsBox, events: dayEvents });
       }
 
       calendarGrid.appendChild(dayDiv);
+    }
+
+    // Agora que todas as células já estão no DOM (com dimensões reais),
+    // encaixamos os horários de cada dia sem nunca "cortar" um item pela metade:
+    // em vez de um número fixo de badges, medimos o espaço disponível de cada
+    // dia e mostramos o máximo que cabe de forma limpa, resumindo o restante
+    // num indicador "+N" sempre visível por inteiro.
+    pendingFits.forEach(({ eventsBox, events }) => fitDayEvents(eventsBox, events));
+    pendingFits.length = 0;
+  }
+
+  // Cria o elemento visual de um horário (chip com hora + serviço no desktop,
+  // vira um pontinho colorido no mobile via CSS).
+  function createEventBadge(evt) {
+    const badge = document.createElement('span');
+    badge.className = `badge-event ${evt.status}`;
+    badge.title = `${evt.time} - ${evt.services.join(' + ')}`;
+    badge.innerHTML = `
+      <span class="badge-event-time">${evt.time}</span>
+      <span class="badge-event-service">${evt.services.join(' + ')}</span>
+    `;
+    return badge;
+  }
+
+  // Preenche o container de horários de um dia com quantos itens realmente
+  // couberem no espaço disponível (medido em pixels reais), e resume o
+  // restante num badge "+N mais" que fica sempre inteiro, nunca cortado.
+  function fitDayEvents(eventsBox, events) {
+    eventsBox.innerHTML = '';
+    events.forEach(evt => eventsBox.appendChild(createEventBadge(evt)));
+
+    // Cabe tudo? Ótimo, não precisamos resumir nada.
+    if (eventsBox.scrollHeight <= eventsBox.clientHeight + 1) return;
+
+    // Não cabe tudo: reservamos o indicador "+N mais" e vamos removendo
+    // horários do fim da lista até o que sobrar + o indicador caberem
+    // por inteiro, sem cortes.
+    const more = document.createElement('span');
+    more.className = 'badge-more';
+    eventsBox.appendChild(more);
+
+    const chips = Array.from(eventsBox.querySelectorAll('.badge-event'));
+    let hiddenCount = 0;
+    while (chips.length - hiddenCount > 0 && eventsBox.scrollHeight > eventsBox.clientHeight + 1) {
+      chips[chips.length - 1 - hiddenCount].remove();
+      hiddenCount++;
+    }
+
+    if (hiddenCount > 0) {
+      more.innerText = `+${hiddenCount} mais`;
+      eventsBox.classList.add('has-more');
+    } else {
+      // Segurança: se por algum motivo nada precisou ser escondido, remove o indicador vazio.
+      more.remove();
     }
   }
 
@@ -1119,6 +1165,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const services = getSelectedServices();
     if (!services.length) {
       alert('Selecione ao menos um serviço.');
+      return;
+    }
+
+    // Impede dois agendamentos no mesmo dia e horário (ignora o próprio ao editar)
+    const conflito = (appointments[key] || []).find(a =>
+      a.time === apHora.value && a.id !== editingAppointmentId
+    );
+    if (conflito) {
+      const quem = conflito.clientName ? ` (${conflito.clientName})` : '';
+      alert(`Já existe um agendamento às ${apHora.value} em ${formatShortDate(key)}${quem}. Escolha outro horário.`);
+      apHora.focus();
       return;
     }
 
