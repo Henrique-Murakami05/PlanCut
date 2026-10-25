@@ -183,9 +183,6 @@ document.addEventListener('DOMContentLoaded', () => {
   let editingClientIndex = null;
   let deletingClientIndex = null;
 
-  const historicoList = document.getElementById('historicoList');
-  const historicoEmpty = document.getElementById('historicoEmpty');
-
   const saldoDiaEl = document.getElementById('saldoDia');
   const saldoSemanaEl = document.getElementById('saldoSemana');
   const saldoMesEl = document.getElementById('saldoMes');
@@ -522,37 +519,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderClients();
   });
 
-  // ---------------------------------------------------------------------
-  // RENDER: HISTÓRICO
-  // ---------------------------------------------------------------------
-  function renderHistorico() {
-    historicoList.innerHTML = '';
-    const entries = [];
-
-    Object.keys(appointments).forEach(key => {
-      appointments[key].forEach(evt => {
-        if (evt.status === 'finalizado' || evt.status === 'falta') {
-          entries.push({ key, ...evt });
-        }
-      });
-    });
-
-    // Chaves no formato YYYY-MM-DD ordenam corretamente como texto
-    entries.sort((a, b) => `${b.key}${b.time}`.localeCompare(`${a.key}${a.time}`));
-
-    historicoEmpty.style.display = entries.length ? 'none' : 'block';
-
-    entries.forEach(entry => {
-      const li = document.createElement('li');
-      li.className = 'category-item';
-      li.innerHTML = `
-        <span>${formatShortDate(entry.key)} · ${entry.time} · ${entry.clientName || 'Cliente não informado'} · <span class="client-phone">${entry.clientPhone || 'Sem telefone'}</span> · ${entry.services.join(' + ')} · <strong class="finance-value">${formatCurrency(priceOfServices(entry.services))}</strong>${entry.registeredLate ? ` · <span class="retroactive-tag">Registrado posteriormente (em ${formatShortDate(entry.registeredOn)})</span>` : ''}</span>
-        <span class="status-pill status-${entry.status}">${capitalize(entry.status)}</span>
-      `;
-      historicoList.appendChild(li);
-    });
-  }
-
   function capitalize(s) {
     return s.charAt(0).toUpperCase() + s.slice(1);
   }
@@ -729,16 +695,14 @@ document.addEventListener('DOMContentLoaded', () => {
     dashboard: document.getElementById('page-dashboard'),
     financeiro: document.getElementById('page-financeiro'),
     atendimento: document.getElementById('page-atendimento'),
-    clientes: document.getElementById('page-clientes'),
-    historico: document.getElementById('page-historico')
+    clientes: document.getElementById('page-clientes')
   };
 
   const pageLabels = {
     dashboard: 'Dashboard · Agenda',
     financeiro: 'Financeiro · Saldo',
     atendimento: 'Atendimento',
-    clientes: 'Clientes',
-    historico: 'Histórico'
+    clientes: 'Clientes'
   };
 
   function goToPage(pageName) {
@@ -747,7 +711,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     pageTitle.innerText = pageLabels[pageName] || pageName;
 
-    if (pageName === 'historico') renderHistorico();
     if (pageName === 'clientes') renderClients();
     if (pageName === 'financeiro' || pageName === 'atendimento') renderFinance();
   }
