@@ -1022,7 +1022,7 @@ header h1 {
   opacity: 0.6;
 }
 
-/* PÁGINAS DE COLUNA ÚNICA (FINANCEIRO / CLIENTES / HISTÓRICO) */
+/* PÁGINAS DE COLUNA ÚNICA (FINANCEIRO / CLIENTES) */
 .content-container.single-col {
   grid-template-columns: minmax(0, 1fr);
 }
@@ -1071,7 +1071,6 @@ header h1 {
 }
 
 #dayAppointmentsList .category-item,
-#historicoList .category-item,
 #clientList .category-item {
   cursor: default;
 }
