@@ -21,9 +21,8 @@
       <ul class="nav-menu">
         <li class="nav-item active"><a href="#" data-page="dashboard">Dashboard</a></li>
         <li class="nav-item"><a href="#" data-page="financeiro">Financeiro</a></li>
-        <li class="nav-item"><a href="#" data-page="atendimento">Atendimento</a></li>
         <li class="nav-item"><a href="#" data-page="clientes">Clientes</a></li>
-        <li class="nav-item"><a href="#" data-page="historico">Histórico</a></li>
+        <li class="nav-item"><a href="#" data-page="atendimento">Atendimento</a></li>
       </ul>
     </div>
     <button class="btn-logout" id="btnLogout">LOGOUT</button>
@@ -286,7 +285,7 @@
         </div>
         <form id="formCliente" class="inline-form">
           <input type="text" id="clienteNome" placeholder="Nome do cliente" required>
-          <input type="tel" id="clienteTelefone" placeholder="Telefone" required>
+          <input type="tel" id="clienteTelefone" placeholder="Telefone Ex:(11) 98765-4321" required>
           <button type="submit" class="btn-action">+ Adicionar</button>
         </form>
         <ul class="category-list" id="clientList"></ul>
@@ -325,17 +324,6 @@
           <button class="btn-action btn-danger" id="btnConfirmClientDelete">Excluir</button>
         </div>
       </div>
-    </div>
-
-    <!-- PÁGINA: HISTÓRICO -->
-    <div class="content-container single-col" id="page-historico" style="display:none;">
-      <section class="card">
-        <div class="card-title">
-          <span>Histórico de atendimentos</span>
-        </div>
-        <ul class="category-list" id="historicoList"></ul>
-        <p class="empty-state" id="historicoEmpty">Nenhum atendimento finalizado ou com falta ainda.</p>
-      </section>
     </div>
 
   </main>
