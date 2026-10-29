@@ -134,6 +134,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const formAppointment = document.getElementById('formAppointment');
   const apData = document.getElementById('apData');
   const apHora = document.getElementById('apHora');
+
+  // Máscara HH:MM: digita só os números e os ":" entram sozinhos
+  apHora.addEventListener('input', () => {
+    let d = apHora.value.replace(/\D/g, '').slice(0, 4);
+    if (d.length === 1 && d > '2') d = '0' + d;                 // "9"  -> "09"
+    if (d.length >= 2 && Number(d.slice(0, 2)) > 23) d = '23' + d.slice(2); // limita a hora a 23
+    if (d.length === 3 && d[2] > '5') d = d.slice(0, 2) + '0' + d[2];      // "17" + "7" -> "17:07"
+    if (d.length === 4 && Number(d.slice(2)) > 59) d = d.slice(0, 2) + '59';   // limita os minutos a 59
+    apHora.value = d.length > 2 ? d.slice(0, 2) + ':' + d.slice(2) : d;
+  });
   const apClienteNome = document.getElementById('apClienteNome');
   const apClienteTelefone = document.getElementById('apClienteTelefone');
   const apServicoChips = document.getElementById('apServicoChips');
@@ -208,6 +218,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const gastoDescricao = document.getElementById('gastoDescricao');
   const gastoValor = document.getElementById('gastoValor');
   const gastoData = document.getElementById('gastoData');
+  let pickerGastoData = null;
+  let pickerProdutoData = null;
   const expenseList = document.getElementById('expenseList');
   const expenseEmpty = document.getElementById('expenseEmpty');
   const expenseTotalEl = document.getElementById('expenseTotal');
@@ -1222,6 +1234,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     expenses.push({ id: `g${nextExpenseId++}`, description: descricao, value: valor, date: data });
     formGasto.reset();
+    if (pickerGastoData) pickerGastoData.setValue(todayKey, false);
     toggleInlineForm(formGasto, btnToggleFormGasto, false);
     renderFinance();
   });
@@ -1247,6 +1260,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     products.push({ id: `p${nextProductId++}`, name: nome, quantity: quantidade, value: valor, date: data });
     formProduto.reset();
+    if (pickerProdutoData) pickerProdutoData.setValue(todayKey, false);
     produtoQuantidade.value = 1;
     toggleInlineForm(formProduto, btnToggleFormProduto, false);
     renderFinance();
@@ -1610,6 +1624,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (pickerOrdemEl) {
     pickerOrdem = createSelect(pickerOrdemEl, () => renderFinanceAtendimentoSearch());
+  }
+
+  // Datas de "Gastos" e "Produtos adquiridos": mesmo seletor de calendário do Atendimento
+  // (começam no dia de hoje; o input hidden mantém o mesmo id e o valor AAAA-MM-DD)
+  const pickerGastoEl = document.getElementById('pickerGastoData');
+  const pickerProdutoEl = document.getElementById('pickerProdutoData');
+  if (pickerGastoEl) {
+    pickerGastoData = createPicker(pickerGastoEl, 'date');
+    pickerGastoData.setValue(todayKey, false);
+  }
+  if (pickerProdutoEl) {
+    pickerProdutoData = createPicker(pickerProdutoEl, 'date');
+    pickerProdutoData.setValue(todayKey, false);
   }
 
   if (btnLimparFiltroAtendimento) {
