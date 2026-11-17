@@ -1,0 +1,334 @@
+/* ---------------------------------------------------------------------
+   TELAS DE AUTENTICAÇÃO (Cadastro / Login / Redefinir senha)
+   --------------------------------------------------------------------- */
+
+.auth-body {
+  height: auto;
+  min-height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* PAINEL DE MARCA (lado com a "imagem de fundo") */
+.auth-bg {
+  position: relative;
+  flex: 1.4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 60px;
+  background: linear-gradient(160deg, var(--color-primary) 0%, #012338 55%, #001625 100%);
+  color: var(--color-white);
+}
+
+.auth-bg::before,
+.auth-bg::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+}
+
+.auth-bg::before {
+  width: 360px;
+  height: 360px;
+  background: rgba(252, 191, 73, 0.16);
+  top: -100px;
+  left: -100px;
+}
+
+.auth-bg::after {
+  width: 280px;
+  height: 280px;
+  background: rgba(247, 127, 0, 0.14);
+  bottom: -80px;
+  right: -60px;
+}
+
+.auth-bg-content {
+  position: relative;
+  z-index: 1;
+  max-width: 380px;
+  text-align: center;
+}
+
+.auth-bg-icon {
+  font-size: 60px;
+  margin-bottom: 22px;
+}
+
+.auth-bg-content h2 {
+  font-family: 'Baloo 2', 'Nunito', sans-serif;
+  font-size: 27px;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+.auth-bg-content p {
+  font-size: 15px;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+/* PAINEL DO FORMULÁRIO */
+.auth-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  background-color: var(--color-bg);
+  min-width: 340px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 380px;
+  background-color: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 40px 36px;
+  text-align: center;
+  box-shadow: 0 16px 36px rgba(0, 48, 73, 0.12);
+}
+
+.auth-logo {
+  width: 68px;
+  height: 68px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  background-color: var(--color-accent);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 800;
+  box-shadow: 0 6px 16px rgba(252, 191, 73, 0.45);
+}
+
+.auth-logo-lock {
+  background-color: var(--color-primary);
+  color: var(--color-accent);
+}
+
+.auth-card h1 {
+  font-family: 'Baloo 2', 'Nunito', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 6px;
+}
+
+.auth-subtitle {
+  font-size: 13px;
+  opacity: 0.65;
+  margin-bottom: 24px;
+}
+
+.auth-card .form-group {
+  text-align: left;
+}
+
+.auth-forgot {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-danger);
+  text-decoration: none;
+}
+
+.auth-forgot:hover {
+  text-decoration: underline;
+}
+
+.auth-submit {
+  width: 100%;
+  margin-top: 8px;
+  padding: 12px;
+  font-size: 14px;
+}
+
+.auth-switch {
+  margin-top: 22px;
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+.auth-switch a {
+  color: var(--color-danger);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.auth-switch a:hover {
+  text-decoration: underline;
+}
+
+/* NOTEBOOKS / TELAS MÉDIAS: reduz o painel ilustrado para dar mais espaço
+   ao formulário e evita que o card fique espremido em janelas ~900-1200px */
+@media (max-width: 1200px) {
+  .auth-bg {
+    flex: 1;
+    padding: 44px;
+  }
+  .auth-bg-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+  }
+  .auth-bg-content h2 {
+    font-size: 23px;
+  }
+  .auth-bg-content p {
+    font-size: 14px;
+  }
+  .auth-panel {
+    flex: 1;
+    padding: 32px 20px;
+    min-width: 300px;
+  }
+  .auth-card {
+    padding: 32px 28px;
+  }
+}
+
+@media (max-width: 800px) {
+  .auth-bg {
+    display: none;
+  }
+  .auth-panel {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 420px) {
+  .auth-panel {
+    padding: 28px 14px;
+  }
+  .auth-card {
+    padding: 26px 20px;
+  }
+  .auth-logo {
+    width: 56px;
+    height: 56px;
+    font-size: 24px;
+    margin-bottom: 14px;
+  }
+  .auth-card h1 {
+    font-size: 21px;
+  }
+}
+
+/* TELAS DE POUCA ALTURA (notebooks com barra de tarefas/abas ocupando espaço,
+   ou zoom/escala do sistema ativos): compacta o card e some com a ilustração
+   para que o formulário caiba sem precisar rolar a página */
+@media (max-height: 700px) {
+  .auth-bg {
+    display: none;
+  }
+  .auth-panel {
+    padding: 20px;
+    min-width: 0;
+  }
+  .auth-card {
+    padding: 24px 28px;
+  }
+  .auth-logo {
+    width: 50px;
+    height: 50px;
+    font-size: 22px;
+    margin-bottom: 10px;
+  }
+  .auth-card h1 {
+    font-size: 20px;
+    margin-bottom: 4px;
+  }
+  .auth-subtitle {
+    margin-bottom: 16px;
+  }
+  .auth-card .form-group {
+    margin-bottom: 10px;
+  }
+  .auth-switch {
+    margin-top: 14px;
+  }
+}
+
+/* ---------------------------------------------------------------------
+   REDEFINIR SENHA: etapas e campo de código
+   --------------------------------------------------------------------- */
+.reset-etapa[hidden] {
+  display: none;
+}
+
+.auth-subtitle strong {
+  color: var(--color-primary);
+  word-break: break-all;
+}
+
+.codigo-inputs {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.auth-card .codigo-inputs input {
+  width: 100%;
+  min-width: 0;
+  padding: 12px 0;
+  text-align: center;
+  font-family: 'Baloo 2', 'Nunito', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.codigo-erro {
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-danger);
+}
+
+.codigo-erro[hidden] {
+  display: none;
+}
+
+.reset-acoes {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.reset-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-danger);
+  cursor: pointer;
+}
+
+.reset-link:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.reset-link:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 420px) {
+  .codigo-inputs {
+    gap: 5px;
+  }
+  .auth-card .codigo-inputs input {
+    font-size: 18px;
+    padding: 10px 0;
+  }
+}

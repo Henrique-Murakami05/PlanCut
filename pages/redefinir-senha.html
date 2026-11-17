@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PlanCut - Redefinir senha</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles/style.css">
+  <link rel="stylesheet" href="../styles/auth.css">
+</head>
+<body class="auth-body">
+
+  <div class="auth-bg">
+    <div class="auth-bg-content">
+      <div class="auth-bg-icon">✂</div>
+      <h2>Vamos recuperar seu acesso</h2>
+      <p>Escolha uma nova senha para voltar a acessar sua agenda com segurança.</p>
+    </div>
+  </div>
+
+  <div class="auth-panel">
+    <div class="auth-card">
+      <div class="auth-logo auth-logo-lock">🔒</div>
+
+      <!-- ETAPA 1: informar o e-mail -->
+      <section id="etapaEmail" class="reset-etapa">
+        <h1>Redefinir senha</h1>
+        <p class="auth-subtitle">Informe seu e-mail para receber um código de verificação.</p>
+
+        <form id="formEmailReset">
+          <div class="form-group">
+            <label for="resetEmail">E-mail</label>
+            <input type="email" id="resetEmail" placeholder="seuemail@exemplo.com" required>
+          </div>
+          <button type="submit" class="btn-action auth-submit">Enviar código</button>
+        </form>
+      </section>
+
+      <!-- ETAPA 2: digitar o código recebido por e-mail -->
+      <section id="etapaCodigo" class="reset-etapa" hidden>
+        <h1>Digite o código</h1>
+        <p class="auth-subtitle">Enviamos um código de 6 dígitos para <strong id="emailEnviado"></strong>.</p>
+
+        <form id="formCodigoReset">
+          <div class="form-group">
+            <label for="codigo1">Código de verificação</label>
+            <div class="codigo-inputs" id="codigoInputs">
+              <input type="text" id="codigo1" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Dígito 1" required>
+              <input type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 2" required>
+              <input type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 3" required>
+              <input type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 4" required>
+              <input type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 5" required>
+              <input type="text" inputmode="numeric" maxlength="1" aria-label="Dígito 6" required>
+            </div>
+            <p class="codigo-erro" id="codigoErro" hidden></p>
+          </div>
+          <button type="submit" class="btn-action auth-submit">Verificar código</button>
+        </form>
+
+        <div class="reset-acoes">
+          <button type="button" class="reset-link" id="btnReenviar">Reenviar código</button>
+          <button type="button" class="reset-link" id="btnTrocarEmail">Trocar e-mail</button>
+        </div>
+      </section>
+
+      <!-- ETAPA 3: nova senha (só aparece depois do código válido) -->
+      <section id="etapaSenha" class="reset-etapa" hidden>
+        <h1>Nova senha</h1>
+        <p class="auth-subtitle">Código confirmado! Crie uma nova senha para sua conta.</p>
+
+        <form id="formRedefinirSenha">
+          <div class="form-group">
+            <label for="novaSenha">Nova senha</label>
+            <input type="password" id="novaSenha" placeholder="Digite a nova senha" minlength="6" required>
+          </div>
+          <div class="form-group">
+            <label for="confirmarNovaSenha">Confirmar nova senha</label>
+            <input type="password" id="confirmarNovaSenha" placeholder="Repita a nova senha" minlength="6" required>
+          </div>
+          <button type="submit" class="btn-action auth-submit">Redefinir senha</button>
+        </form>
+      </section>
+
+      <p class="auth-switch">Lembrou a senha? <a href="login.html">Entrar</a></p>
+    </div>
+  </div>
+
+  <script src="../scripts/auth.js"></script>
+</body>
+</html>

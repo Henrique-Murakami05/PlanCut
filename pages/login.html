@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PlanCut - Entrar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles/style.css">
+  <link rel="stylesheet" href="../styles/auth.css">
+</head>
+<body class="auth-body">
+
+  <div class="auth-bg">
+    <div class="auth-bg-content">
+      <div class="auth-bg-icon">✂</div>
+      <h2>Bem-vindo de volta</h2>
+      <p>Acesse sua conta para acompanhar a agenda e o saldo da sua barbearia.</p>
+    </div>
+  </div>
+
+  <div class="auth-panel">
+    <div class="auth-card">
+      <div class="auth-logo">✂</div>
+      <h1>Entrar</h1>
+      <p class="auth-subtitle">Informe seus dados para acessar a PlanCut.</p>
+
+      <form id="formLogin">
+        <div class="form-group">
+          <label for="loginEmail">E-mail</label>
+          <input type="email" id="loginEmail" placeholder="seuemail@exemplo.com" required>
+        </div>
+        <div class="form-group">
+          <label for="loginSenha">Senha</label>
+          <input type="password" id="loginSenha" placeholder="Sua senha" required>
+          <a href="redefinir-senha.html" class="auth-forgot">Esqueci minha senha</a>
+        </div>
+        <button type="submit" class="btn-action auth-submit">Entrar</button>
+      </form>
+
+      <p class="auth-switch">Não tem uma conta? <a href="../index.html">Cadastre-se</a></p>
+    </div>
+  </div>
+
+  <script src="../scripts/auth.js"></script>
+</body>
+</html>
