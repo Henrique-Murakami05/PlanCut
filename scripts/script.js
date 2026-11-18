@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ---------------------------------------------------------------------
   // VERIFICAÇÃO DE AUTENTICAÇÃO
   // ---------------------------------------------------------------------
-  const API_BASE = 'http://localhost:3000/api';
+  const API_BASE = '/api';
 
   // Verifica se o usuário está autenticado ao abrir a página
   async function verificarAutenticacao() {
